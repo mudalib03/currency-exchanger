@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { ClipLoader } from "react-spinners";
-import "./CurrencyConverter.css";
-
+import ConversionResult from "./ConversionResult"
+import "../components/CurrencyConverter.css";
 const CurrencyConverter = () => {
   const [amount, setAmount] = useState(1);
   const [fromCurrency, setFromCurrency] = useState("USD");
@@ -12,28 +12,30 @@ const CurrencyConverter = () => {
   const [loading, setLoading] = useState(false);
   const [toast, setToast] = useState(null);
   const [error, setError] = useState(null);
-  const [darkMode, setDarkMode] = useState(false);
+  const [darkMode, setDarkMode] = useState(() => localStorage.getItem("darkMode") === "true");
 
-  const API_URL = "https://open.er-api.com/v6/latest";
+  const API_URL = process.env.REACT_APP_API_URL || "https://open.er-api.com/v6/latest";
 
   // Fetch currencies on mount
   useEffect(() => {
-    setLoading(true);
-    axios
-      .get(`${API_URL}/USD`)
-      .then((response) => {
+    const fetchCurrencies = async () => {
+      setLoading(true);
+      try {
+        const response = await axios.get(`${API_URL}/USD`);
         setCurrencies(Object.keys(response.data.rates));
-        setLoading(false);
-      })
-      .catch(() => {
-        setLoading(false);
+      } catch {
         setError("Failed to fetch currencies. Please try again later.");
         showToast("Error fetching currencies!", "error");
-      });
-  }, []);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchCurrencies();
+  }, [API_URL]);
 
   // Handle conversion
-  const convertCurrency = () => {
+  const convertCurrency = async () => {
     if (!fromCurrency || !toCurrency) {
       setError("Please select valid currencies.");
       showToast("Invalid currency selection!", "error");
@@ -44,24 +46,24 @@ const CurrencyConverter = () => {
       showToast("Invalid amount!", "error");
       return;
     }
+
     setLoading(true);
     setError(null);
-    axios
-      .get(`${API_URL}/${fromCurrency}`)
-      .then((response) => {
-        const rate = response.data.rates[toCurrency];
-        if (!rate) {
-          throw new Error("Invalid currency pair");
-        }
-        setExchangeRate(rate);
-        setLoading(false);
-        showToast("Currency converted successfully!", "success");
-      })
-      .catch(() => {
-        setLoading(false);
-        setError("Failed to fetch exchange rate. Please try again.");
-        showToast("Error fetching exchange rate!", "error");
-      });
+
+    try {
+      const response = await axios.get(`${API_URL}/${fromCurrency}`);
+      const rate = response.data.rates[toCurrency];
+      if (!rate) {
+        throw new Error("Invalid currency pair");
+      }
+      setExchangeRate(rate);
+      showToast("Currency converted successfully!", "success");
+    } catch {
+      setError("Failed to fetch exchange rate. Please try again.");
+      showToast("Error fetching exchange rate!", "error");
+    } finally {
+      setLoading(false);
+    }
   };
 
   // Show toast notification
@@ -72,7 +74,9 @@ const CurrencyConverter = () => {
 
   // Toggle dark mode
   const toggleDarkMode = () => {
-    setDarkMode(!darkMode);
+    const newMode = !darkMode;
+    setDarkMode(newMode);
+    localStorage.setItem("darkMode", newMode);
   };
 
   // Apply dark mode class to body
@@ -109,6 +113,7 @@ const CurrencyConverter = () => {
         <input
           id="amount"
           type="number"
+          aria-label="Enter amount to convert"
           value={amount}
           onChange={handleAmountChange}
           min="0"
@@ -118,6 +123,7 @@ const CurrencyConverter = () => {
         <label htmlFor="fromCurrency">From:</label>
         <select
           id="fromCurrency"
+          aria-label="Select currency to convert from"
           value={fromCurrency}
           onChange={(e) => setFromCurrency(e.target.value)}
           disabled={loading}
@@ -132,6 +138,7 @@ const CurrencyConverter = () => {
         <label htmlFor="toCurrency">To:</label>
         <select
           id="toCurrency"
+          aria-label="Select currency to convert to"
           value={toCurrency}
           onChange={(e) => setToCurrency(e.target.value)}
           disabled={loading}
@@ -170,12 +177,14 @@ const CurrencyConverter = () => {
           </div>
         )}
 
+        {/* Use ConversionResult component */}
         {exchangeRate && !loading && (
-          <div>
-            <h2>
-              {amount} {fromCurrency} = {(amount * exchangeRate).toFixed(2)} {toCurrency}
-            </h2>
-          </div>
+          <ConversionResult
+            amount={amount}
+            fromCurrency={fromCurrency}
+            toCurrency={toCurrency}
+            exchangeRate={exchangeRate}
+          />
         )}
       </div>
 
