@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { ClipLoader } from "react-spinners";
-import ConversionResult from "./ConversionResult"
+import ConversionResult from "./ConversionResult";
+import Footer from "./Footer"; // Ensure Footer is imported
 import "../components/CurrencyConverter.css";
+
 const CurrencyConverter = () => {
   const [amount, setAmount] = useState(1);
   const [fromCurrency, setFromCurrency] = useState("USD");
@@ -193,6 +195,9 @@ const CurrencyConverter = () => {
           {toast.message}
         </div>
       )}
+
+      {/* Use Footer component */}
+      <Footer />
     </div>
   );
 };
