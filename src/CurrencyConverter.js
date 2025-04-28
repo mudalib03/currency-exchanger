@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
-import "./CurrencyConverter.css"; // Link to the CSS file
+import "./CurrencyConverter.css"; 
 
 const CurrencyConverter = () => {
   const [amount, setAmount] = useState(1);
@@ -22,6 +22,11 @@ const CurrencyConverter = () => {
       const rate = response.data.rates[toCurrency];
       setExchangeRate(rate);
     });
+  };
+
+  const getFlagUrl = (currency) => {
+    const countryCode = currency.slice(0, 2).toUpperCase();
+    return `https://flagsapi.com/${countryCode}/flat/32.png`;
   };
 
   return (
