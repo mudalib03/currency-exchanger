@@ -1,0 +1,89 @@
+.bank-account {
+  background: white;
+  padding: 30px;
+  border-radius: 10px;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+  margin-top: 30px;
+}
+
+.balance {
+  font-size: 32px;
+  font-weight: bold;
+  margin-bottom: 20px;
+  text-align: center;
+}
+
+.actions {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+  margin-bottom: 20px;
+}
+
+.actions input {
+  padding: 10px;
+  font-size: 16px;
+  width: 200px;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+}
+
+.actions button {
+  background-color: #4CAF50;
+  color: white;
+  padding: 12px 20px;
+  font-size: 16px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+  width: 200px;
+}
+
+.actions button:hover {
+  opacity: 0.8;
+}
+
+.actions button.withdraw {
+  background-color: #f44336;
+}
+
+.error {
+  color: red;
+  font-weight: bold;
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.transaction-history {
+  margin-top: 20px;
+}
+
+.transaction-history h3 {
+  text-align: center;
+}
+
+.transaction-history ul {
+  list-style: none;
+  padding: 0;
+}
+
+.transaction-history li {
+  background: #eee;
+  margin-bottom: 10px;
+  padding: 10px;
+  border-radius: 6px;
+  display: flex;
+  justify-content: space-between;
+}
+
+.transaction-history li.deposit {
+  background-color: #e3f9e3;
+  color: #4CAF50;
+}
+
+.transaction-history li.withdraw {
+  background-color: #ffcccb;
+  color: #f44336;
+}
