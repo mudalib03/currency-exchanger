@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { ClipLoader } from "react-spinners";
 import ConversionResult from "./ConversionResult";
+import ConversionHistory from "./ConversionHistory";
 import Footer from "./Footer"; // Ensure Footer is imported
 import "../components/CurrencyConverter.css";
 
@@ -15,6 +16,7 @@ const CurrencyConverter = () => {
   const [toast, setToast] = useState(null);
   const [error, setError] = useState(null);
   const [darkMode, setDarkMode] = useState(() => localStorage.getItem("darkMode") === "true");
+  const [history, setHistory] = useState([]);
 
   const API_URL = process.env.REACT_APP_API_URL || "https://open.er-api.com/v6/latest";
 
@@ -60,6 +62,16 @@ const CurrencyConverter = () => {
       }
       setExchangeRate(rate);
       showToast("Currency converted successfully!", "success");
+
+      setHistory([
+        ...history,
+        {
+          amount,
+          fromCurrency,
+          toCurrency,
+          convertedAmount: (amount * rate).toFixed(2),
+        },
+      ]);
     } catch {
       setError("Failed to fetch exchange rate. Please try again.");
       showToast("Error fetching exchange rate!", "error");
@@ -195,6 +207,8 @@ const CurrencyConverter = () => {
           {toast.message}
         </div>
       )}
+
+      <ConversionHistory history={history} />
 
       {/* Use Footer component */}
       <Footer />
