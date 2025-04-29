@@ -1,65 +1,134 @@
-/* src/index.css */
+/* Reset and Base Styling */
 * {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-    font-family: 'Roboto', sans-serif;
-    transition: all 0.3s ease;
-  }
-  
-  body {
-    background-color: #F1F1F1;
-    color: #333333;
-    font-size: 16px;
-    display: flex;
-    flex-direction: column;
-    justify-content: flex-start;
-    align-items: center;
-    min-height: 100vh;
-  }
-  
-  h1, h2, h3 {
-    font-family: 'Roboto', sans-serif;
-    font-weight: 600;
-  }
-  
-  a {
-    text-decoration: none;
-    color: inherit;
-  }
-  
-  button {
-    cursor: pointer;
-    border: none;
-    background-color: #1E90FF;
-    color: #fff;
-    padding: 12px 24px;
-    border-radius: 50px;
-    font-size: 18px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-    transition: all 0.3s ease;
-  }
-  
-  button:hover {
-    background-color: #005bb5;
-    transform: scale(1.05);
-  }
-  
-  button:active {
-    transform: scale(1);
-  }
-  
-  input, select {
-    padding: 14px 20px;
-    border-radius: 8px;
-    border: 1px solid #ddd;
-    width: 100%;
-    margin-top: 10px;
-    transition: border-color 0.3s ease;
-  }
-  
-  input:focus, select:focus {
-    border-color: #1E90FF;
-    outline: none;
-  }
-  
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: 'Roboto', sans-serif;
+  transition: all 0.3s ease;
+}
+
+body {
+  background-color: #f1f1f1;
+  color: #333333;
+  font-size: 16px;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Headings */
+h1, h2, h3 {
+  font-weight: 600;
+}
+
+/* Links */
+a {
+  text-decoration: none;
+  color: inherit;
+}
+
+/* Buttons */
+button {
+  cursor: pointer;
+  border: none;
+  background-color: #1e90ff;
+  color: #fff;
+  padding: 12px 24px;
+  border-radius: 50px;
+  font-size: 18px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+}
+
+button:hover {
+  background-color: #005bb5;
+  transform: scale(1.05);
+}
+
+button:active {
+  transform: scale(1);
+}
+
+/* Inputs and Selects */
+input, select {
+  padding: 14px 20px;
+  border-radius: 8px;
+  border: 1px solid #ddd;
+  width: 100%;
+  margin-top: 10px;
+  transition: border-color 0.3s ease;
+}
+
+input:focus, select:focus {
+  border-color: #1e90ff;
+  outline: none;
+}
+
+/* Header Styling */
+.header {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: #4f46e5;
+  color: white;
+  padding: 1rem;
+}
+
+/* Code Block Font */
+code {
+  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New', monospace;
+}
+
+/* Toast Notification */
+.toast {
+  margin-top: 1rem;
+  padding: 1rem 1.5rem;
+  border-radius: 8px;
+  font-weight: bold;
+  text-align: center;
+  width: 80%;
+  max-width: 400px;
+}
+
+.toast.success {
+  background-color: #d1e7dd;
+  color: #0f5132;
+}
+
+.toast.error {
+  background-color: #f8d7da;
+  color: #842029;
+}
+
+/* Dark Mode */
+body.dark {
+  background-color: #121212;
+  color: #f0f0f0;
+}
+
+body.dark button {
+  background-color: #333;
+}
+
+body.dark button:hover {
+  background-color: #555;
+}
+
+body.dark input, body.dark select {
+  background-color: #1f1f1f;
+  color: #fff;
+  border-color: #555;
+}
+
+body.dark .toast.success {
+  background-color: #234d2d;
+  color: #a3f3c2;
+}
+
+body.dark .toast.error {
+  background-color: #5a1a1a;
+  color: #fcbaba;
+}
