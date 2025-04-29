@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
-import { ClipLoader } from "react-spinners";
 import ConversionResult from "./ConversionResult";
 import ConversionHistory from "./ConversionHistory";
-import Footer from "./Footer"; // Ensure Footer is imported
+import Footer from "./Footer";
+import LoadingScreen from "./LoadingScreen"; // ✅ NEW IMPORT
 import "../components/CurrencyConverter.css";
 
 const CurrencyConverter = () => {
@@ -20,7 +20,6 @@ const CurrencyConverter = () => {
 
   const API_URL = process.env.REACT_APP_API_URL || "https://open.er-api.com/v6/latest";
 
-  // Fetch currencies on mount
   useEffect(() => {
     const fetchCurrencies = async () => {
       setLoading(true);
@@ -38,7 +37,6 @@ const CurrencyConverter = () => {
     fetchCurrencies();
   }, [API_URL]);
 
-  // Handle conversion
   const convertCurrency = async () => {
     if (!fromCurrency || !toCurrency) {
       setError("Please select valid currencies.");
@@ -80,20 +78,17 @@ const CurrencyConverter = () => {
     }
   };
 
-  // Show toast notification
   const showToast = (message, type) => {
     setToast({ message, type });
     setTimeout(() => setToast(null), 3000);
   };
 
-  // Toggle dark mode
   const toggleDarkMode = () => {
     const newMode = !darkMode;
     setDarkMode(newMode);
     localStorage.setItem("darkMode", newMode);
   };
 
-  // Apply dark mode class to body
   useEffect(() => {
     if (darkMode) {
       document.body.classList.add("dark");
@@ -102,7 +97,6 @@ const CurrencyConverter = () => {
     }
   }, [darkMode]);
 
-  // Handle amount input with validation
   const handleAmountChange = (e) => {
     const value = e.target.value;
     if (value === "") {
@@ -185,14 +179,10 @@ const CurrencyConverter = () => {
           </button>
         </div>
 
-        {loading && (
-          <div className="loader">
-            <ClipLoader color={darkMode ? "#e2e8f0" : "#4f46e5"} loading={loading} size={50} />
-          </div>
-        )}
+        {/* ✅ NEW: Use LoadingScreen component */}
+        <LoadingScreen darkMode={darkMode} loading={loading} />
 
-        {/* Use ConversionResult component */}
-        {exchangeRate && !loading && (
+        {!loading && exchangeRate && (
           <ConversionResult
             amount={amount}
             fromCurrency={fromCurrency}
@@ -209,8 +199,6 @@ const CurrencyConverter = () => {
       )}
 
       <ConversionHistory history={history} />
-
-      {/* Use Footer component */}
       <Footer />
     </div>
   );
