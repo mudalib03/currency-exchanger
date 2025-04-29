@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
-import { ClipLoader } from "react-spinners";
 import AmountInput from "./AmountInput";
 import CurrencySelect from "./CurrencySelect";
 import ConvertButton from "./ConvertButton";
@@ -22,7 +21,7 @@ const CurrencyConverter = () => {
   const [currencies, setCurrencies] = useState([]);
   const [loading, setLoading] = useState(false);
   const [toast, setToast] = useState(null);
-  const [error, setError] = useState(null);
+
   const [darkMode, setDarkMode] = useState(() => localStorage.getItem("darkMode") === "true");
   const [history, setHistory] = useState(() => {
     const saved = localStorage.getItem("history");
@@ -41,7 +40,6 @@ const CurrencyConverter = () => {
       })
       .catch(() => {
         setLoading(false);
-        setError("Failed to fetch currencies.");
         showToast("Error fetching currencies!", "error");
       });
   }, [API_URL]);
