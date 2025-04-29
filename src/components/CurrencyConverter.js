@@ -1,39 +1,69 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { ClipLoader } from "react-spinners";
+import AmountInput from "./AmountInput";
+import CurrencySelect from "./CurrencySelect";
+import ConvertButton from "./ConvertButton";
+import SwapButton from "./SwapButton";
+import ResultDisplay from "./ResultDisplay";
+import HistoryList from "./HistoryList";
+import LoadingScreen from "./LoadingScreen";
+import Footer from "./Footer";
 import "./CurrencyConverter.css";
 
 const CurrencyConverter = () => {
-  const [amount, setAmount] = useState(1);
-  const [fromCurrency, setFromCurrency] = useState("USD");
-  const [toCurrency, setToCurrency] = useState("EUR");
+  const [amount, setAmount] = useState(() => {
+    const saved = localStorage.getItem("amount");
+    return saved ? JSON.parse(saved) : 1;
+  });
+  const [fromCurrency, setFromCurrency] = useState(() => localStorage.getItem("fromCurrency") || "USD");
+  const [toCurrency, setToCurrency] = useState(() => localStorage.getItem("toCurrency") || "EUR");
   const [exchangeRate, setExchangeRate] = useState(null);
   const [currencies, setCurrencies] = useState([]);
   const [loading, setLoading] = useState(false);
   const [toast, setToast] = useState(null);
   const [error, setError] = useState(null);
-  const [darkMode, setDarkMode] = useState(false);
+  const [darkMode, setDarkMode] = useState(() => localStorage.getItem("darkMode") === "true");
+  const [history, setHistory] = useState(() => {
+    const saved = localStorage.getItem("history");
+    return saved ? JSON.parse(saved) : [];
+  });
 
-  const API_URL = "https://open.er-api.com/v6/latest";
+  const API_URL = process.env.REACT_APP_API_URL || "https://open.er-api.com/v6/latest";
 
-  // Fetch currencies on mount
   useEffect(() => {
     setLoading(true);
     axios
       .get(`${API_URL}/USD`)
-      .then((response) => {
-        setCurrencies(Object.keys(response.data.rates));
+      .then((res) => {
+        setCurrencies(Object.keys(res.data.rates));
         setLoading(false);
       })
       .catch(() => {
         setLoading(false);
-        setError("Failed to fetch currencies. Please try again later.");
+        setError("Failed to fetch currencies.");
         showToast("Error fetching currencies!", "error");
       });
-  }, []);
+  }, [API_URL]);
 
-  // Handle conversion
-  const convertCurrency = () => {
+  useEffect(() => {
+    localStorage.setItem("amount", JSON.stringify(amount));
+    localStorage.setItem("fromCurrency", fromCurrency);
+    localStorage.setItem("toCurrency", toCurrency);
+    localStorage.setItem("darkMode", darkMode);
+    localStorage.setItem("history", JSON.stringify(history));
+  }, [amount, fromCurrency, toCurrency, darkMode, history]);
+
+  useEffect(() => {
+    document.body.classList.toggle("dark", darkMode);
+  }, [darkMode]);
+
+  const showToast = (message, type) => {
+    setToast({ message, type });
+    setTimeout(() => setToast(null), 3000);
+  };
+
+  const convertCurrency = async () => {
     if (!fromCurrency || !toCurrency) {
       setError("Please select valid currencies.");
       showToast("Invalid currency selection!", "error");
@@ -44,146 +74,104 @@ const CurrencyConverter = () => {
       showToast("Invalid amount!", "error");
       return;
     }
+
     setLoading(true);
     setError(null);
-    axios
-      .get(`${API_URL}/${fromCurrency}`)
-      .then((response) => {
-        const rate = response.data.rates[toCurrency];
-        if (!rate) {
-          throw new Error("Invalid currency pair");
-        }
-        setExchangeRate(rate);
-        setLoading(false);
-        showToast("Currency converted successfully!", "success");
-      })
-      .catch(() => {
-        setLoading(false);
-        setError("Failed to fetch exchange rate. Please try again.");
-        showToast("Error fetching exchange rate!", "error");
-      });
-  };
+    try {
+      const response = await axios.get(`${API_URL}/${fromCurrency}`);
+      const rate = response.data.rates[toCurrency];
+      if (!rate) throw new Error("Invalid currency pair");
 
-  // Show toast notification
-  const showToast = (message, type) => {
-    setToast({ message, type });
-    setTimeout(() => setToast(null), 3000);
-  };
+      setExchangeRate(rate);
+      showToast("Conversion successful!", "success");
 
-  // Toggle dark mode
-  const toggleDarkMode = () => {
-    setDarkMode(!darkMode);
-  };
+      const newEntry = {
+        amount,
+        fromCurrency,
+        toCurrency,
+        result: (amount * rate).toFixed(2),
+        date: new Date().toLocaleString(),
+      };
 
-  // Apply dark mode class to body
-  useEffect(() => {
-    if (darkMode) {
-      document.body.classList.add("dark");
-    } else {
-      document.body.classList.remove("dark");
+      setHistory([newEntry, ...history.slice(0, 4)]); // max 5
+    } catch {
+      setError("Conversion failed.");
+      showToast("Error during conversion!", "error");
+    } finally {
+      setLoading(false);
     }
-  }, [darkMode]);
+  };
 
-  // Handle amount input with validation
-  const handleAmountChange = (e) => {
-    const value = e.target.value;
-    if (value === "") {
-      setAmount("");
-    } else if (value >= 0) {
-      setAmount(Number(value));
+  const toggleDarkMode = () => {
+    setDarkMode((prev) => !prev);
+  };
+
+  const handleSwap = () => {
+    setFromCurrency(toCurrency);
+    setToCurrency(fromCurrency);
+  };
+
+  const handleResetConverter = () => {
+    if (window.confirm("Reset all converter data?")) {
+      setAmount(1);
+      setFromCurrency("USD");
+      setToCurrency("EUR");
+      setExchangeRate(null);
+      setHistory([]);
+      localStorage.clear();
     }
   };
 
   return (
-    <div className="container">
-      <h1>Currency Converter</h1>
+    <div className="currency-converter">
+      <h2>Currency Converter</h2>
 
-      <button onClick={toggleDarkMode} className="btn bg-secondary">
-        {darkMode ? "Light Mode" : "Dark Mode"}
+      <button onClick={toggleDarkMode} className="dark-toggle-btn">
+        {darkMode ? "🌞 Light Mode" : "🌙 Dark Mode"}
       </button>
 
-      <div className="card">
-        {error && <p className="error">{error}</p>}
+      <AmountInput amount={amount} setAmount={setAmount} disabled={loading} />
 
-        <label htmlFor="amount">Amount:</label>
-        <input
-          id="amount"
-          type="number"
-          value={amount}
-          onChange={handleAmountChange}
-          min="0"
-          disabled={loading}
+      <CurrencySelect
+        label="From"
+        selectedCurrency={fromCurrency}
+        setCurrency={setFromCurrency}
+        currencies={currencies}
+        disabled={loading}
+      />
+      <CurrencySelect
+        label="To"
+        selectedCurrency={toCurrency}
+        setCurrency={setToCurrency}
+        currencies={currencies}
+        disabled={loading}
+      />
+
+      <SwapButton onSwap={handleSwap} disabled={loading} />
+      <ConvertButton onConvert={convertCurrency} disabled={loading} />
+
+      <LoadingScreen darkMode={darkMode} loading={loading} />
+
+      {!loading && exchangeRate && (
+        <ResultDisplay
+          amount={amount}
+          fromCurrency={fromCurrency}
+          toCurrency={toCurrency}
+          exchangeRate={exchangeRate}
         />
+      )}
 
-        <label htmlFor="fromCurrency">From:</label>
-        <select
-          id="fromCurrency"
-          value={fromCurrency}
-          onChange={(e) => setFromCurrency(e.target.value)}
-          disabled={loading}
-        >
-          {currencies.map((currency) => (
-            <option key={currency} value={currency}>
-              {currency}
-            </option>
-          ))}
-        </select>
+      {history.length > 0 && <HistoryList history={history} />}
 
-        <label htmlFor="toCurrency">To:</label>
-        <select
-          id="toCurrency"
-          value={toCurrency}
-          onChange={(e) => setToCurrency(e.target.value)}
-          disabled={loading}
-        >
-          {currencies.map((currency) => (
-            <option key={currency} value={currency}>
-              {currency}
-            </option>
-          ))}
-        </select>
-
-        <div className="button-group">
-          <button
-            onClick={convertCurrency}
-            disabled={loading}
-            className="btn bg-secondary"
-          >
-            Convert
-          </button>
-          <button
-            className="swap-button"
-            onClick={() => {
-              setFromCurrency(toCurrency);
-              setToCurrency(fromCurrency);
-            }}
-            disabled={loading}
-            aria-label="Swap currencies"
-          >
-            🔄
-          </button>
-        </div>
-
-        {loading && (
-          <div className="loader">
-            <ClipLoader color={darkMode ? "#e2e8f0" : "#4f46e5"} loading={loading} size={50} />
-          </div>
-        )}
-
-        {exchangeRate && !loading && (
-          <div>
-            <h2>
-              {amount} {fromCurrency} = {(amount * exchangeRate).toFixed(2)} {toCurrency}
-            </h2>
-          </div>
-        )}
+      <div className="reset-converter">
+        <button onClick={handleResetConverter} className="reset-button">
+          Reset Converter
+        </button>
       </div>
 
-      {toast && (
-        <div className={`toast ${toast.type === "success" ? "bg-secondary" : "bg-primary"}`}>
-          {toast.message}
-        </div>
-      )}
+      {toast && <div className={`toast ${toast.type}`}>{toast.message}</div>}
+
+      <Footer />
     </div>
   );
 };
