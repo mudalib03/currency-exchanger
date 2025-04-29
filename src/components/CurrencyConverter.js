@@ -10,19 +10,16 @@ import "../components/CurrencyConverter.css";
 
 const CurrencyConverter = () => {
   const [amount, setAmount] = useState(() => {
-    // Retrieve from local storage if available, else default to 1
     const savedAmount = localStorage.getItem("amount");
     return savedAmount ? JSON.parse(savedAmount) : 1;
   });
 
   const [fromCurrency, setFromCurrency] = useState(() => {
-    // Retrieve from local storage if available, else default to 'USD'
     const savedFromCurrency = localStorage.getItem("fromCurrency");
     return savedFromCurrency ? savedFromCurrency : "USD";
   });
 
   const [toCurrency, setToCurrency] = useState(() => {
-    // Retrieve from local storage if available, else default to 'EUR'
     const savedToCurrency = localStorage.getItem("toCurrency");
     return savedToCurrency ? savedToCurrency : "EUR";
   });
@@ -31,7 +28,6 @@ const CurrencyConverter = () => {
   const [currencies, setCurrencies] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [history, setHistory] = useState(() => {
-    // Retrieve history from local storage
     const savedHistory = localStorage.getItem("history");
     return savedHistory ? JSON.parse(savedHistory) : [];
   });
@@ -39,14 +35,12 @@ const CurrencyConverter = () => {
   const API_URL = "https://open.er-api.com/v6/latest";
 
   useEffect(() => {
-    // Fetch currencies only once, when the component is mounted
     axios.get(`${API_URL}/USD`).then((response) => {
       setCurrencies(Object.keys(response.data.rates));
     });
   }, []);
 
   useEffect(() => {
-    // Save data to local storage whenever it's updated
     localStorage.setItem("amount", JSON.stringify(amount));
     localStorage.setItem("fromCurrency", fromCurrency);
     localStorage.setItem("toCurrency", toCurrency);
@@ -60,7 +54,6 @@ const CurrencyConverter = () => {
       setExchangeRate(rate);
       setIsLoading(false);
 
-      // Save to history
       const newConversion = {
         amount,
         fromCurrency,
@@ -68,8 +61,8 @@ const CurrencyConverter = () => {
         result: (amount * rate).toFixed(2),
         date: new Date().toLocaleString(),
       };
-      const updatedHistory = [newConversion, ...history.slice(0, 4)]; // Keep only last 5
-      setHistory(updatedHistory); // Update history in state
+      const updatedHistory = [newConversion, ...history.slice(0, 4)];
+      setHistory(updatedHistory);
     });
   };
 
@@ -77,6 +70,20 @@ const CurrencyConverter = () => {
     const temp = fromCurrency;
     setFromCurrency(toCurrency);
     setToCurrency(temp);
+  };
+
+  const handleResetConverter = () => {
+    if (window.confirm("Reset all converter data?")) {
+      setAmount(1);
+      setFromCurrency("USD");
+      setToCurrency("EUR");
+      setExchangeRate(null);
+      setHistory([]);
+      localStorage.removeItem("amount");
+      localStorage.removeItem("fromCurrency");
+      localStorage.removeItem("toCurrency");
+      localStorage.removeItem("history");
+    }
   };
 
   return (
@@ -107,6 +114,12 @@ const CurrencyConverter = () => {
         />
       )}
       {history.length > 0 && <HistoryList history={history} />}
+
+      <div className="reset-converter">
+        <button onClick={handleResetConverter} className="reset-button">
+          Reset Converter
+        </button>
+      </div>
     </div>
   );
 };
