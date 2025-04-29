@@ -1,3 +1,4 @@
+
 /* Reset and Base Styling */
 * {
   margin: 0;
@@ -132,3 +133,4 @@ body.dark .toast.error {
   background-color: #5a1a1a;
   color: #fcbaba;
 }
+

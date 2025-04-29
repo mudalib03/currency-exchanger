@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
+import { ClipLoader } from "react-spinners";
 import AmountInput from "./AmountInput";
 import CurrencySelect from "./CurrencySelect";
 import ConvertButton from "./ConvertButton";
@@ -8,22 +9,15 @@ import ResultDisplay from "./ResultDisplay";
 import HistoryList from "./HistoryList";
 import LoadingScreen from "./LoadingScreen";
 import Footer from "./Footer";
-import "../components/CurrencyConverter.css";
+import "./CurrencyConverter.css";
 
 const CurrencyConverter = () => {
   const [amount, setAmount] = useState(() => {
-    const savedAmount = localStorage.getItem("amount");
-    return savedAmount ? JSON.parse(savedAmount) : 1;
+    const saved = localStorage.getItem("amount");
+    return saved ? JSON.parse(saved) : 1;
   });
-
-  const [fromCurrency, setFromCurrency] = useState(() => {
-    return localStorage.getItem("fromCurrency") || "USD";
-  });
-
-  const [toCurrency, setToCurrency] = useState(() => {
-    return localStorage.getItem("toCurrency") || "EUR";
-  });
-
+  const [fromCurrency, setFromCurrency] = useState(() => localStorage.getItem("fromCurrency") || "USD");
+  const [toCurrency, setToCurrency] = useState(() => localStorage.getItem("toCurrency") || "EUR");
   const [exchangeRate, setExchangeRate] = useState(null);
   const [currencies, setCurrencies] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -38,20 +32,18 @@ const CurrencyConverter = () => {
   const API_URL = process.env.REACT_APP_API_URL || "https://open.er-api.com/v6/latest";
 
   useEffect(() => {
-    const fetchCurrencies = async () => {
-      setLoading(true);
-      try {
-        const response = await axios.get(`${API_URL}/USD`);
-        setCurrencies(Object.keys(response.data.rates));
-      } catch {
+    setLoading(true);
+    axios
+      .get(`${API_URL}/USD`)
+      .then((res) => {
+        setCurrencies(Object.keys(res.data.rates));
+        setLoading(false);
+      })
+      .catch(() => {
+        setLoading(false);
         setError("Failed to fetch currencies.");
         showToast("Error fetching currencies!", "error");
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchCurrencies();
+      });
   }, [API_URL]);
 
   useEffect(() => {
@@ -77,16 +69,14 @@ const CurrencyConverter = () => {
       showToast("Invalid currency selection!", "error");
       return;
     }
-
-    if (!amount || amount <= 0) {
-      setError("Enter a valid amount.");
+    if (amount <= 0 || amount === "") {
+      setError("Please enter a valid amount.");
       showToast("Invalid amount!", "error");
       return;
     }
 
     setLoading(true);
     setError(null);
-
     try {
       const response = await axios.get(`${API_URL}/${fromCurrency}`);
       const rate = response.data.rates[toCurrency];
@@ -103,13 +93,17 @@ const CurrencyConverter = () => {
         date: new Date().toLocaleString(),
       };
 
-      setHistory([newEntry, ...history.slice(0, 4)]); // Keep only latest 5
+      setHistory([newEntry, ...history.slice(0, 4)]); // max 5
     } catch {
       setError("Conversion failed.");
       showToast("Error during conversion!", "error");
     } finally {
       setLoading(false);
     }
+  };
+
+  const toggleDarkMode = () => {
+    setDarkMode((prev) => !prev);
   };
 
   const handleSwap = () => {
@@ -132,7 +126,7 @@ const CurrencyConverter = () => {
     <div className="currency-converter">
       <h2>Currency Converter</h2>
 
-      <button onClick={() => setDarkMode(!darkMode)} className="dark-toggle-btn">
+      <button onClick={toggleDarkMode} className="dark-toggle-btn">
         {darkMode ? "🌞 Light Mode" : "🌙 Dark Mode"}
       </button>
 
