@@ -1,8 +1,10 @@
-import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
-import '/home/reagan/Desktop/PHASE -2/currency-exchanger/src/components/homepage.css'; // Import your CSS file
-import './homepage.css'; // Import your CSS file
-import '/home/reagan/Desktop/PHASE -2/currency-exchanger/src/navbar.js'; 
+import React, { useState } from "react";
+import { Link } from "react-router-dom";
+import "./homepage.css"; // Use relative path for CSS
+import Navbar from "/home/reagan/Desktop/PHASE -2/currency-exchanger/src/navbar.js";
+import About from "/home/reagan/Desktop/PHASE -2/currency-exchanger/src/components/About.js";
+import Services from "/home/reagan/Desktop/PHASE -2/currency-exchanger/src/components/services.js";
+import Contact from "/home/reagan/Desktop/PHASE -2/currency-exchanger/src/components/Contact.js";
 
 const HomePage = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -12,8 +14,9 @@ const HomePage = () => {
       {/* Navigation */}
       <nav className="navbar">
         <div className="container">
-          <Link to="/" className="logo">YourLogo</Link>
+          <Link to="/" className="logo">Currency Converter</Link>
           <div className={`nav-links ${isOpen ? 'active' : ''}`}>
+
             <Link to="/about">About</Link>
             <Link to="/services">Services</Link>
             <Link to="/contact">Contact</Link>

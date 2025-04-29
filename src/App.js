@@ -1,17 +1,26 @@
+import React from "react";
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import Navbar from "/home/reagan/Desktop/PHASE -2/currency-exchanger/src/navbar.js";
+import Homepage from "./components/homepage";
+import About from "./components/About";
+import Services from "./components/services";
+import Contact from "/home/reagan/Desktop/PHASE -2/currency-exchanger/src/components/Contact.js";
 import CurrencyConverter from "./CurrencyConverter";
 import "/home/reagan/Desktop/PHASE -2/currency-exchanger/src/CurrencyConverter.css";
-import React from "react";
+import "/home/reagan/Desktop/PHASE -2/currency-exchanger/src/components/homepage.css"; // Import your CSS file
 
-import Navbar from "/home/reagan/Desktop/PHASE -2/currency-exchanger/src/navbar.js";
-import Homepage from "/home/reagan/Desktop/PHASE -2/currency-exchanger/src/components/homepage.js";
-import "/home/reagan/Desktop/PHASE -2/currency-exchanger/src/components/homepage.css"; // Import your CSS fileimpo
 function App() {
   return (
-    <div className="App">
+    <Router>
       <Navbar />
-      <Homepage />
+      <Routes>
+        <Route path="/" element={<Homepage />} />
+        <Route path="/about" element={<About />} />
+        <Route path="/services" element={<Services />} />
+        <Route path="/contact" element={<Contact />} />
+      </Routes>
       <CurrencyConverter />
-    </div>
+    </Router>
   );
 }
 
